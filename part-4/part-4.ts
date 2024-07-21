@@ -10,7 +10,7 @@ class PricingEngineRunner {
     }
 
     async runTests(pricingEngine: any) {
-        scenarios.forEach(async (scenario) => {
+        for (const scenario of scenarios) {
             const result = await pricingEngine.getLowestPrice(
                 scenario.timeout,
                 scenario.providers
@@ -34,7 +34,7 @@ class PricingEngineRunner {
                 const expected = `${scenario.result.provider.name} at \$${scenario.result.price}`;
                 console.log(`SUCCESS [#${scenario.id}]: Got expected ${expected}`);
             }
-        });
+        }
     }
 }
 
@@ -76,24 +76,39 @@ class PricingEngine {
      *
      */
 
-    async getLowestPrice(timeout: number, providers: any[]) {
-        const promises = providers.map(provider =>
-            new Promise(resolve =>
-                setTimeout(() => resolve(provider.getPrice()), provider.delay)
-            )
-        );
+    async getLowestPrice(timeout: number, providers: any) {
+        let result = null;
+        let providerResults = [];
+        for (const provider of providers) {
+            // { provider: { id: 2, name: 'Provider 2' }, price: 250 }
 
-        const results = await Promise.all(promises.map(p => Promise.race([p, new Promise(resolve => setTimeout(() => resolve(null), timeout))])));
 
-        const validResults = results.filter(result => result !== null);
-        if (validResults.length === 0) return null;
+            const price = await new Promise((resolve, reject) => {
+                provider.getPrice().then((price: unknown) => {
+                    resolve(price);
+                }).catch(() => {
+                    resolve(null);
+                });
 
-        return validResults.reduce((lowest, result) =>
-            !lowest || result.price < lowest.price ? result : lowest, null
-        );
+            }); // fails 2 cases
+
+            //const price = await provider.getPrice(); // passed 1, 3, 4, 5
+            console.log(price);
+            providerResults.push(provider);
+        }
+        providerResults = providerResults.filter(provider => provider.price != null && provider.price >= 0);
+        // return the result with the lowest price property
+        if (providerResults.length > 0) {
+            providerResults.sort((a, b) => a.price - b.price);
+            // check result is positive
+
+            console.log(providerResults);
+
+            result = providerResults[0];
+        }
+        return result;
+
     }
-
-
 }
 
 const pricingEngineRunner = new PricingEngineRunner();
