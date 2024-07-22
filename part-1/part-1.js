@@ -15,16 +15,16 @@ function task1() {
     for (const provider of PROVIDERS) {
         if (provider.industry === 'retail') {
             for (const price of provider.prices) {
-                    if (price.premium) {
-                        totalPremium += price.premium;
-                    }
-                    if (price.fee) {
-                        totalFees += price.fee;
-                    }
+                if (price.premium) {
+                    totalPremium += price.premium;
+                }
+                if (price.fee) {
+                    totalFees += price.fee;
                 }
             }
-
         }
+
+    }
     return [{
         totalPremium,
         totalFees
@@ -38,18 +38,17 @@ function task2() {
 
     let min = Infinity;
     for (const provider of PROVIDERS) {
-            if (provider.industry === 'technology') {
-
-                for (const price of provider.prices) {
-                    if (price.premium < min) {
-                        min = price.premium;
-                    }
+        if (provider.industry === 'technology') {
+            for (const price of provider.prices) {
+                if (price.premium < min) {
+                    min = price.premium;
                 }
+            }
         }
     }
 
     return [{
-            totalPremium : min
+        totalPremium: min
     }];
 }
 
@@ -61,13 +60,13 @@ function task3() {
 
     let names = [];
     for (const provider of PROVIDERS) {
-            if (provider.industry === 'technology') {
+        if (provider.industry === 'technology') {
 
-                for (const price of provider.prices) {
-                    if (price.premium >= 1000) { // IRL dont hard code this
-                        names.push(provider.name);
-                    }
+            for (const price of provider.prices) {
+                if (price.premium >= 1000) { // IRL dont hard code this
+                    names.push(provider.name);
                 }
+            }
         }
     }
 
@@ -81,7 +80,7 @@ function task3() {
  */
 
 module.exports = {
-  task1,
-  task2,
-  task3,
+    task1,
+    task2,
+    task3,
 };

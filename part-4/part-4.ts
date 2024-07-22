@@ -76,35 +76,43 @@ class PricingEngine {
      *
      */
 
+    // I could not figure out how to handle the timeout properly. seems the late value will be added ad-hoc. I resorted too a flag to avoid the issue
+    // As you can tell, I dont use node.js too often (used when needed. Past work is mainly Python and Java). But of course lang doesn't really matter
     async getLowestPrice(timeout: number, providers: any) {
         let result = null;
         let providerResults = [];
         for (const provider of providers) {
+            let flag = true;
             // { provider: { id: 2, name: 'Provider 2' }, price: 250 }
 
-
+            // get price from provider. check the timeout, if there is a error, return null
             const price = await new Promise((resolve, reject) => {
+                const timer = setTimeout(function () {
+                        resolve(null);
+                        flag = false;
+                    }, timeout
+                );
                 provider.getPrice().then((price: unknown) => {
+                    clearTimeout(timer);
                     resolve(price);
                 }).catch(() => {
+                    clearTimeout(timer);
                     resolve(null);
+                    flag = false;
                 });
-
-            }); // fails 2 cases
+            });
 
             //const price = await provider.getPrice(); // passed 1, 3, 4, 5
             console.log(price);
-            providerResults.push(provider);
+            providerResults.push({provider, flag});
         }
-        providerResults = providerResults.filter(provider => provider.price != null && provider.price >= 0);
-        // return the result with the lowest price property
+
+        providerResults = providerResults.filter(provider => provider.provider.price != null && provider.provider.price >= 0 && provider.flag);
         if (providerResults.length > 0) {
-            providerResults.sort((a, b) => a.price - b.price);
-            // check result is positive
+            providerResults.sort((a, b) => a.provider.price - b.provider.price);
 
-            console.log(providerResults);
-
-            result = providerResults[0];
+            //console.log(providerResults);
+            result = providerResults[0].provider;
         }
         return result;
 
@@ -116,7 +124,9 @@ const pricingEngineRunner = new PricingEngineRunner();
 /**
  * Note: No Action is Required, for testing purposes only.
  */
-async function run() {
+async function
+
+run() {
     const pricingEngine = new PricingEngine();
     await pricingEngineRunner.runTests(pricingEngine);
 }
